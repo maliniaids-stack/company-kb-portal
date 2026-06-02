@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Know Hub; Portal — Internal System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #E5185A;
+    --accent-hover: #C51249;
+    --bg: #F4F2EE;
+    --surface: #FFFFFF;
+    --surface2: #F9F8F5;
+    --border: #E2DFD7;
+    --text: #1A1917;
+    --muted: #6E6C65;
+    --sidebar: #FDFCF8;
+    --sidebar-w: 228px;
+    --header-h: 64px;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Instrument Sans', sans-serif;
+    --cat-hr-bg: #EEF2FF; --cat-hr-text: #3730A3; --cat-hr-border: #C7D2FE;
+    --cat-finance-bg: #ECFDF5; --cat-finance-text: #065F46; --cat-finance-border: #A7F3D0;
+    --cat-it-bg: #EFF6FF; --cat-it-text: #1E40AF; --cat-it-border: #BFDBFE;
+    --cat-support-bg: #FFF7ED; --cat-support-text: #92400E; --cat-support-border: #FDE68A;
+    --cat-legal-bg: #FDF4FF; --cat-legal-text: #6B21A8; --cat-legal-border: #E9D5FF;
+    --cat-other-bg: #F1F5F9; --cat-other-text: #334155; --cat-other-border: #CBD5E1;
+  }
+
+  body.dark {
+    --bg: #0D0D0B;
+    --surface: #161614;
+    --surface2: #1E1E1B;
+    --border: #2A2A27;
+    --text: #EDEAE2;
+    --muted: #888780;
+    --sidebar: #121210;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.2s ease;
+    overflow: hidden;
+  }
+  #sidebar.collapsed { width: 56px; }
+
+  .sidebar-logo {
+    padding: 18px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--header-h);
+  }
+  .logo-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-family: var(--font-display); font-weight: 700; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-text { overflow: hidden; white-space: nowrap; }
+  .logo-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-top: 1px; }
+
+  nav { flex: 1; padding: 10px 8px; }
+  .nav-btn {
+    width: 100%; display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px; border-radius: 8px; border: none;
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: var(--font-body); font-size: 13.5px; font-weight: 400;
+    text-align: left; white-space: nowrap; transition: all 0.12s; margin-bottom: 2px;
+  }
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
+  .nav-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+
+  .sidebar-footer {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+  .status-row { display: flex; align-items: center; margin-bottom: 6px; overflow: hidden; white-space: nowrap; }
+
+  .dark-toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .toggle-track {
+    width: 38px; height: 21px; background: #D1D0C8; border-radius: 11px;
+    cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0;
+  }
+  body.dark .toggle-track { background: var(--accent); }
+  .toggle-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 15px; height: 15px; border-radius: 50%; background: #fff; transition: left 0.2s;
+  }
+  body.dark .toggle-thumb { left: 20px; }
+
+  .collapse-btn {
+    width: 100%; padding: 6px 8px; background: transparent;
+    border: 1px solid var(--border); border-radius: 6px;
+    color: var(--muted); font-size: 11px; cursor: pointer; margin-top: 4px;
+  }
+  .collapse-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── MAIN ── */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: var(--header-h);
+    display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  .topbar-titles { flex: 1; }
+  .topbar-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text); }
+  .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #FEE2E2; color: #991B1B; font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .page-content { flex: 1; overflow: auto; padding: 22px 24px; }
+
+  /* ── TABS ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── EXPLORE ── */
+  .search-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 16px;
+  }
+  .search-input-wrap { position: relative; margin-bottom: 12px; }
+  .search-input-wrap .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
+  .search-input {
+    width: 100%; padding: 9px 12px 9px 34px;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-size: 13.5px;
+    font-family: var(--font-body); outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .tag-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .tag-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; margin-right: 2px; }
+  .tag-pill {
+    padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 11.5px; cursor: pointer;
+    transition: all 0.12s; font-family: var(--font-body);
+  }
+  .tag-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .tag-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .cat-filter { display: flex; gap: 7px; margin-bottom: 18px; flex-wrap: wrap; }
+  .cat-btn {
+    padding: 6px 15px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.12s; font-family: var(--font-body);
+  }
+  .cat-btn:hover { border-color: var(--accent); }
+  .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 14px;
+  }
+  .article-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px 18px; cursor: pointer;
+    transition: all 0.14s; position: relative;
+  }
+  .article-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .cat-badge {
+    font-size: 10.5px; font-weight: 600; padding: 2px 9px; border-radius: 20px;
+    border: 1px solid; letter-spacing: 0.02em;
+  }
+  .card-date { font-size: 11px; color: var(--muted); }
+  .card-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 7px; line-height: 1.4; }
+  .card-excerpt {
+    font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 12px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+  .card-tag { font-size: 10.5px; padding: 2px 8px; border-radius: 20px; background: var(--surface2); color: var(--muted); }
+  .card-author { font-size: 11px; color: var(--muted); }
+  .card-file-icon { font-size: 11px; color: var(--muted); float: right; }
+
+  .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 0; color: var(--muted); }
+  .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 16px; padding: 28px 32px;
+    width: 560px; max-height: 82vh; overflow: auto; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px;
+    background: transparent; border: none; font-size: 18px; cursor: pointer; color: var(--muted);
+  }
+  .modal-cat { margin-bottom: 8px; }
+  .modal-title { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+  .modal-meta { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  .modal-body { font-size: 14.5px; line-height: 1.85; color: var(--text); white-space: pre-wrap; }
+  .modal-tags { margin-top: 18px; display: flex; gap: 7px; flex-wrap: wrap; }
+  .modal-file-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; padding: 8px 14px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); font-size: 13px; color: var(--text); text-decoration: none; }
+
+  /* ── ADMIN ── */
+  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .admin-count { font-size: 13px; color: var(--muted); }
+  .btn-primary {
+    padding: 8px 18px; border-radius: 8px; background: var(--accent);
+    color: #fff; border: none; font-family: var(--font-body); font-size: 13.5px;
+    font-weight: 500; cursor: pointer; transition: background 0.12s;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+
+  .form-card {
+    background: var(--surface); border: 2px solid var(--accent);
+    border-radius: var(--radius-lg); padding: 22px; margin-bottom: 20px;
+  }
+  .form-card.edit-mode { border-color: #3B82F6; }
+  .form-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 8px 11px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-family: var(--font-body);
+    font-size: 13.5px; outline: none; transition: border-color 0.12s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea { resize: vertical; min-height: 90px; }
+  .form-full { width: 100%; margin-bottom: 10px; }
+  .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .btn-secondary {
+    padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-family: var(--font-body);
+    font-size: 13.5px; cursor: pointer;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger {
+    padding: 8px 16px; border-radius: 8px; background: #EF4444;
+    color: #fff; border: none; font-family: var(--font-body); font-size: 13.5px; cursor: pointer;
+  }
+  .btn-update {
+    padding: 8px 16px; border-radius: 8px; background: #3B82F6;
+    color: #fff; border: none; font-family: var(--font-body); font-size: 13.5px; cursor: pointer;
+  }
+
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius-lg);
+    padding: 22px; text-align: center; background: var(--surface2);
+    cursor: pointer; transition: border-color 0.12s; margin-bottom: 10px;
+  }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); }
+  .upload-zone-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone-label { font-size: 13px; color: var(--muted); }
+  .upload-zone-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .articles-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid var(--border); background: var(--surface2); }
+  th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  td { padding: 11px 14px; color: var(--text); vertical-align: middle; }
+  td.muted { color: var(--muted); }
+  .edit-btn {
+    padding: 4px 11px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; color: var(--text); font-size: 12px; cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── ANALYTICS ── */
+  .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+  .metric-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 18px; text-align: center;
+  }
+  .metric-icon { font-size: 26px; margin-bottom: 8px; }
+  .metric-value { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .metric-label { font-size: 11.5px; color: var(--muted); }
+
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; }
+  .chart-title { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+  .bar-row { margin-bottom: 12px; }
+  .bar-meta { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text); margin-bottom: 5px; }
+  .bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+  /* ── CHAT ── */
+  .chat-outer { max-width: 560px; margin: 0 auto; }
+  .chat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; }
+  .chat-icon { font-size: 36px; margin-bottom: 12px; }
+  .chat-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .chat-desc { font-size: 13.5px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .chat-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .chat-input {
+    flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); font-family: var(--font-body);
+    font-size: 13.5px; outline: none;
+  }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-send { padding: 10px 20px; border-radius: 8px; background: var(--accent); color: #fff; border: none; cursor: pointer; font-size: 13.5px; font-weight: 500; }
+  .chat-messages { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; max-height: 380px; overflow-y: auto; }
+  .msg { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; line-height: 1.6; }
+  .msg.user { background: var(--accent); color: #fff; align-self: flex-end; max-width: 85%; }
+  .msg.ai { background: var(--surface2); color: var(--text); border: 1px solid var(--border); align-self: flex-start; max-width: 95%; }
+  .msg.loading { color: var(--muted); font-style: italic; }
+  .confidence-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); margin-top: 6px; color: var(--muted); }
+  .sources-mini { margin-top: 8px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 6px; }
+
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: #1C1B18; color: #fff; padding: 10px 18px;
+    border-radius: 8px; font-size: 13px; z-index: 500;
+    display: none; animation: fadeIn 0.2s;
+  }
+  .toast.show { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-dot">K</div>
+    <div class="logo-text">
+      <div class="logo-title">Know Your Stuff </div>
+      <div class="logo-sub">Upload and refer</div>
+    </div>
+  </div>
+
+  <nav>
+    <button class="nav-btn active" data-page="explore">
+      <span class="nav-icon">🗂</span><span class="nav-label">Explore Hub</span>
+    </button>
+    <button class="nav-btn" data-page="chat">
+      <span class="nav-icon">💬</span><span class="nav-label">AI Chat Room</span>
+    </button>
+    <button class="nav-btn" data-page="admin">
+      <span class="nav-icon">⚙️</span><span class="nav-label">Admin Console</span>
+    </button>
+    <button class="nav-btn" data-page="analytics">
+      <span class="nav-icon">📊</span><span class="nav-label">Analytics</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="dark-toggle-row">
+      <span>Dark Mode</span>
+      <div class="toggle-track" id="darkToggle"><div class="toggle-thumb"></div></div>
+    </div>
+    <div class="status-row"><span class="status-dot" style="background:#22C55E"></span><span>FastAPI Connected</span></div>
+    <div class="status-row"><span class="status-dot" style="background:#F59E0B"></span><span>LLaMA-3.3 Groq</span></div>
+    <button class="collapse-btn" id="collapseBtn">◀ Collapse</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <div class="topbar-titles">
+      <div class="topbar-title" id="pageTitle">Explore Knowledge Hub</div>
+      <div class="topbar-sub" id="pageSub">Search, browse, and filter all internal documents and guides.</div>
+    </div>
+    <div class="user-avatar">A</div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- EXPLORE -->
+    <div class="page active" id="page-explore">
+      <div class="search-box">
+        <div class="search-input-wrap">
+          <span class="icon">🔍</span>
+          <input class="search-input" id="searchInput" placeholder="Search by keyword, tag, or article title…" oninput="filterArticles()" />
+        </div>
+        <div class="tag-row">
+          <span class="tag-label">Quick Tags:</span>
+          <div id="tagPills"></div>
+        </div>
+      </div>
+
+      <div class="cat-filter" id="catFilter"></div>
+
+      <div class="articles-grid" id="articlesGrid"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="page" id="page-chat">
+      <div class="chat-outer">
+        <div class="chat-card">
+          <div class="chat-icon">🤖</div>
+          <div class="chat-title">AI Chat Room</div>
+          <div class="chat-desc">Ask anything about your uploaded documents. The system retrieves the most relevant chunks and generates an answer using LLaMA-3.3 via Groq.</div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chatInput" placeholder="Ask a company-related question…" onkeydown="if(event.key==='Enter')sendChat()" />
+            <button class="chat-send" onclick="sendChat()" id="chatSendBtn">Ask</button>
+          </div>
+          <div id="chatMessages" class="chat-messages"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="page" id="page-admin">
+      <div class="admin-header">
+        <div class="admin-count" id="adminCount">0 articles</div>
+        <button class="btn-primary" onclick="showNewForm()">+ New Article</button>
+      </div>
+
+      <!-- New article form -->
+      <div class="form-card" id="newForm" style="display:none">
+        <div class="form-title">Create New Article</div>
+        <div class="form-grid">
+          <input class="form-input" id="nTitle" placeholder="Title" />
+          <select class="form-select" id="nCategory">
+            <option>HR</option><option>Finance</option><option>IT</option><option>Support</option><option>Legal</option><option>Other</option>
+          </select>
+        </div>
+        <input class="form-input form-full" id="nTags" placeholder="Tags (comma-separated)" />
+        <input class="form-input form-full" id="nAuthor" placeholder="Author" />
+        <textarea class="form-textarea form-full" id="nContent" placeholder="Article content (or leave blank if uploading a file)…"></textarea>
+
+        <!-- Upload zone -->
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event)">
+          <div class="upload-zone-icon">📁</div>
+          <div class="upload-zone-label">Click or drag a file here</div>
+          <div class="upload-zone-sub">.txt · .pdf · .docx · .doc</div>
+          <div id="uploadedFileName" style="margin-top:6px;font-size:12px;color:var(--accent)"></div>
+        </div>
+        <input type="file" id="fileInput" accept=".txt,.pdf,.docx,.doc" style="display:none" onchange="handleFileSelect(this)" />
+
+        <div class="form-actions">
+          <button class="btn-primary" onclick="createArticle()">Save Article</button>
+          <button class="btn-secondary" onclick="hideNewForm()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <div class="form-card edit-mode" id="editForm" style="display:none">
+        <div class="form-title">Edit Article</div>
+        <div class="form-grid">
+          <input class="form-input" id="eTitle" placeholder="Title" />
+          <select class="form-select" id="eCategory">
+            <option>HR</option><option>Finance</option><option>IT</option><option>Support</option><option>Legal</option><option>Other</option>
+          </select>
+        </div>
+        <input class="form-input form-full" id="eTags" placeholder="Tags (comma-separated)" />
+        <input class="form-input form-full" id="eAuthor" placeholder="Author" />
+        <textarea class="form-textarea form-full" id="eContent" placeholder="Content…"></textarea>
+
+        <!-- Replace file upload -->
+        <div class="upload-zone" id="editUploadZone" onclick="document.getElementById('editFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleEditDrop(event)">
+          <div class="upload-zone-icon">🔄</div>
+          <div class="upload-zone-label">Upload new file to replace existing</div>
+          <div class="upload-zone-sub">.txt · .pdf · .docx · .doc</div>
+          <div id="editUploadedFileName" style="margin-top:6px;font-size:12px;color:var(--accent)"></div>
+        </div>
+        <input type="file" id="editFileInput" accept=".txt,.pdf,.docx,.doc" style="display:none" onchange="handleEditFileSelect(this)" />
+
+        <div class="form-actions">
+          <button class="btn-update" onclick="saveEdit()">Update</button>
+          <button class="btn-danger" onclick="deleteArticle()">Delete</button>
+          <button class="btn-secondary" onclick="hideEditForm()">Cancel</button>
+        </div>
+      </div>
+
+      <div class="articles-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th><th>Category</th><th>Tags</th><th>Author</th><th>File</th><th>Updated</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="adminTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div class="metric-grid" id="metricGrid"></div>
+      <div class="chart-card">
+        <div class="chart-title">Articles by category</div>
+        <div id="barChart"></div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main -->
+
+<!-- Article viewer modal -->
+<div class="modal-overlay" id="articleModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-cat" id="modalCat"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-tags" id="modalTags"></div>
+    <div id="modalFileLink"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = window.location.origin;
+
+// ── STATE ──accept=".txt,.pdf,.docx"
+let articles = [];
+let selectedCat = 'All';
+let selectedTags = [];
+let editingId = null;
+let pendingFile = null;
+let pendingEditFile = null;
+const CATEGORIES = ['All','HR','Finance','IT','Support','Legal','Other'];
+const CAT_COLORS = {
+  HR:      {bg:'var(--cat-hr-bg)',      text:'var(--cat-hr-text)',      border:'var(--cat-hr-border)'},
+  Finance: {bg:'var(--cat-finance-bg)', text:'var(--cat-finance-text)', border:'var(--cat-finance-border)'},
+  IT:      {bg:'var(--cat-it-bg)',      text:'var(--cat-it-text)',      border:'var(--cat-it-border)'},
+  Support: {bg:'var(--cat-support-bg)', text:'var(--cat-support-text)', border:'var(--cat-support-border)'},
+  Legal:   {bg:'var(--cat-legal-bg)',   text:'var(--cat-legal-text)',   border:'var(--cat-legal-border)'},
+  Other:   {bg:'var(--cat-other-bg)',   text:'var(--cat-other-text)',   border:'var(--cat-other-border)'},
+};
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', () => {
+  buildCatFilter();
+  fetchArticles();
+  setupNav();
+  document.getElementById('darkToggle').onclick = toggleDark;
+  document.getElementById('collapseBtn').onclick = toggleSidebar;
+});
+
+// ── NAV ──
+const PAGE_META = {
+  explore: ['Explore Knowledge Hub', 'Search, browse, and filter all internal documents and guides.'],
+  chat:    ['AI Chat Room', 'Ask the AI anything from your uploaded knowledge base.'],
+  admin:   ['Admin Console', 'Create, edit, and manage knowledge base articles.'],
+  analytics: ['Analytics', 'Usage stats and document coverage.'],
+};
+function setupNav() {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.page;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+      document.getElementById('page-'+p).classList.add('active');
+      document.getElementById('pageTitle').textContent = PAGE_META[p][0];
+      document.getElementById('pageSub').textContent  = PAGE_META[p][1];
+      if (p === 'analytics') renderAnalytics();
+      if (p === 'admin') renderAdminTable();
+    });
+  });
+}
+
+// ── SIDEBAR ──
+let sidebarOpen = true;
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+  document.getElementById('collapseBtn').textContent = sidebarOpen ? '◀ Collapse' : '▶';
+  document.querySelectorAll('.nav-label,.logo-text,.sidebar-footer .status-row,.dark-toggle-row').forEach(el => {
+    el.style.display = sidebarOpen ? '' : 'none';
+  });
+  document.getElementById('collapseBtn').textContent = sidebarOpen ? '◀ Collapse' : '▶';
+}
+
+// ── DARK MODE ──
+function toggleDark() {
+  document.body.classList.toggle('dark');
+}
+
+// ── FETCH ARTICLES ──
+async function fetchArticles() {
+  try {
+    const res = await fetch(`${API}/articles`);
+    if (res.ok) articles = await res.json();
+  } catch (e) {
+    // API not running — use local state (demo mode)
+  }
+  renderExplore();
+  renderAdminTable();
+}
+
+// ── CATEGORY FILTER ──
+function buildCatFilter() {
+  const cf = document.getElementById('catFilter');
+  cf.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === selectedCat ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { selectedCat = cat; buildCatFilter(); filterArticles(); };
+    cf.appendChild(btn);
+  });
+}
+
+// ── TAGS ──
+function buildTagPills() {
+  const allTags = [...new Set(articles.flatMap(a => a.tags || []))].slice(0, 12);
+  const container = document.getElementById('tagPills');
+  container.innerHTML = '';
+  allTags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-pill' + (selectedTags.includes(tag) ? ' active' : '');
+    btn.textContent = tag;
+    btn.onclick = () => {
+      if (selectedTags.includes(tag)) selectedTags = selectedTags.filter(t => t !== tag);
+      else selectedTags.push(tag);
+      buildTagPills();
+      filterArticles();
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ── FILTER ──
+function filterArticles() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = articles.filter(a => {
+    const matchCat = selectedCat === 'All' || a.category === selectedCat;
+    const matchTags = selectedTags.length === 0 || selectedTags.every(t => (a.tags || []).includes(t));
+    const matchSearch = !q || a.title.toLowerCase().includes(q)
+      || (a.content || '').toLowerCase().includes(q)
+      || (a.tags || []).some(t => t.includes(q));
+    return matchCat && matchTags && matchSearch;
+  });
+  renderGrid(filtered);
+}
+
+// ── RENDER EXPLORE ──
+function renderExplore() {
+  buildTagPills();
+  filterArticles();
+}
+
+function renderGrid(list) {
+  const grid = document.getElementById('articlesGrid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div>No articles match your search.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(a => {
+    const cc = CAT_COLORS[a.category] || CAT_COLORS.Other;
+    const tags = (a.tags || []).map(t => `<span class="card-tag">${t}</span>`).join('');
+    const fileIcon = a.filename ? '📄' : '';
+    return `
+      <div class="article-card" onclick="openModal(${a.id})">
+        <div class="card-top">
+          <span class="cat-badge" style="background:${cc.bg};color:${cc.text};border-color:${cc.border}">${a.category}</span>
+          <span class="card-date">${a.updated || ''}</span>
+        </div>
+        <div class="card-title">${a.title} <span class="card-file-icon">${fileIcon}</span></div>
+        <div class="card-excerpt">${a.content || ''}</div>
+        <div class="card-tags">${tags}</div>
+        <div class="card-author">${a.author || ''}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── MODAL ──
+function openModal(id) {
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  const cc = CAT_COLORS[a.category] || CAT_COLORS.Other;
+  document.getElementById('modalCat').innerHTML = `<span class="cat-badge" style="background:${cc.bg};color:${cc.text};border-color:${cc.border}">${a.category}</span>`;
+  document.getElementById('modalTitle').textContent = a.title;
+  document.getElementById('modalMeta').textContent = `By ${a.author || 'Unknown'} · Updated ${a.updated || ''}`;
+  document.getElementById('modalBody').textContent = a.content || 'No text content — see attached file.';
+  document.getElementById('modalTags').innerHTML = (a.tags || []).map(t => `<span class="card-tag">${t}</span>`).join('');
+  document.getElementById('modalFileLink').innerHTML = a.filename
+    ? `<a class="modal-file-link" href="${API}/file/${a.id}" target="_blank">📄 ${a.filename}</a>` : '';
+  document.getElementById('articleModal').classList.add('open');
+}
+function closeModal() { document.getElementById('articleModal').classList.remove('open'); }
+document.getElementById('articleModal').addEventListener('click', e => { if (e.target.id === 'articleModal') closeModal(); });
+
+// ── ADMIN TABLE ──
+function renderAdminTable() {
+  document.getElementById('adminCount').textContent = `${articles.length} article${articles.length !== 1 ? 's' : ''}`;
+  const tbody = document.getElementById('adminTable');
+  tbody.innerHTML = articles.map(a => {
+    const cc = CAT_COLORS[a.category] || CAT_COLORS.Other;
+    const tagStr = (a.tags || []).slice(0,2).join(', ') + (a.tags && a.tags.length > 2 ? ` +${a.tags.length-2}` : '');
+    return `<tr>
+      <td style="font-weight:500">${a.title}</td>
+      <td><span class="cat-badge" style="background:${cc.bg};color:${cc.text};border-color:${cc.border}">${a.category}</span></td>
+      <td class="muted">${tagStr}</td>
+      <td class="muted">${a.author || ''}</td>
+      <td class="muted">${a.filename ? '📄 '+a.filename : '—'}</td>
+      <td class="muted">${a.updated || ''}</td>
+      <td><button class="edit-btn" onclick="openEditForm(${a.id})">Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── NEW FORM ──
+function showNewForm() {
+  document.getElementById('newForm').style.display = '';
+  document.getElementById('editForm').style.display = 'none';
+
+  // Reset file state
+  pendingFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadedFileName').textContent = '';
+}
+function hideNewForm() {
+  document.getElementById('newForm').style.display = 'none';
+
+  // Clear form fields
+  document.getElementById('nTitle').value = '';
+  document.getElementById('nCategory').value = 'HR';
+  document.getElementById('nTags').value = '';
+  document.getElementById('nAuthor').value = '';
+  document.getElementById('nContent').value = '';
+
+  // Clear uploaded file
+  pendingFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('uploadedFileName').textContent = '';
+}
+function handleFileSelect(input) {
+  if (input.files[0]) {
+    pendingFile = input.files[0];
+    document.getElementById('uploadedFileName').textContent = '✓ ' + pendingFile.name;
+  }
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  if (e.dataTransfer.files[0]) {
+    pendingFile = e.dataTransfer.files[0];
+    document.getElementById('uploadedFileName').textContent = '✓ ' + pendingFile.name;
+  }
+}
+
+async function createArticle() {
+  const title = document.getElementById('nTitle').value.trim();
+  const content = document.getElementById('nContent').value.trim();
+  if (!title) { toast('Title is required'); return; }
+
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('category', document.getElementById('nCategory').value);
+  fd.append('tags', document.getElementById('nTags').value);
+  fd.append('author', document.getElementById('nAuthor').value);
+  fd.append('content', content);
+  if (pendingFile) fd.append('file', pendingFile);
+
+  try {
+    const res = await fetch(`${API}/articles`, { method: 'POST', body: fd });
+    if (res.ok) {
+      await fetchArticles();
+    }
+    else {
+      // fallback: add locally
+      addLocally(title, content);
+    }
+  } catch {
+    addLocally(title, content);
+  }
+  hideNewForm();
+  renderExplore();
+  renderAdminTable();
+  toast('Article created');
+}
+
+function addLocally(title, content) {
+  articles.push({
+    id: Date.now(), title,
+    category: document.getElementById('nCategory').value,
+    tags: document.getElementById('nTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    author: document.getElementById('nAuthor').value,
+    content,
+    filename: pendingFile ? pendingFile.name : null,
+    updated: new Date().toISOString().slice(0,10)
+  });
+}
+
+// ── EDIT FORM ──
+function openEditForm(id) {
+  editingId = id;
+  const a = articles.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('eTitle').value    = a.title;
+  document.getElementById('eCategory').value = a.category;
+  document.getElementById('eTags').value     = (a.tags || []).join(', ');
+  document.getElementById('eAuthor').value   = a.author || '';
+  document.getElementById('eContent').value  = a.content || '';
+  document.getElementById('editUploadedFileName').textContent = a.filename ? 'Current: ' + a.filename : '';
+  pendingEditFile = null;
+  document.getElementById('editForm').style.display = '';
+  document.getElementById('newForm').style.display  = 'none';
+  document.getElementById('editForm').scrollIntoView({ behavior: 'smooth' });
+}
+function hideEditForm() {
+  document.getElementById('editForm').style.display = 'none';
+
+  editingId = null;
+  pendingEditFile = null;
+
+  document.getElementById('editFileInput').value = '';
+  document.getElementById('editUploadedFileName').textContent = '';
+}
+
+function handleEditFileSelect(input) {
+  if (input.files[0]) {
+    pendingEditFile = input.files[0];
+    document.getElementById('editUploadedFileName').textContent = '✓ New: ' + pendingEditFile.name;
+  }
+}
+function handleEditDrop(e) {
+  e.preventDefault();
+  document.getElementById('editUploadZone').classList.remove('drag');
+  if (e.dataTransfer.files[0]) {
+    pendingEditFile = e.dataTransfer.files[0];
+    document.getElementById('editUploadedFileName').textContent = '✓ New: ' + pendingEditFile.name;
+  }
+}
+
+async function saveEdit() {
+  const idx = articles.findIndex(x => x.id === editingId);
+  if (idx === -1) return;
+
+  const fd = new FormData();
+  fd.append('title',    document.getElementById('eTitle').value);
+  fd.append('category', document.getElementById('eCategory').value);
+  fd.append('tags',     document.getElementById('eTags').value);
+  fd.append('author',   document.getElementById('eAuthor').value);
+  fd.append('content',  document.getElementById('eContent').value);
+  if (pendingEditFile) fd.append('file', pendingEditFile);
+
+  try {
+    const res = await fetch(`${API}/articles/${editingId}`, { method: 'PUT', body: fd });
+    if (res.ok) {
+      await fetchArticles();
+    }
+    else updateLocally(idx);
+  } catch { updateLocally(idx); }
+
+  hideEditForm();
+  renderExplore();
+  renderAdminTable();
+  toast('Article updated');
+}
+
+function updateLocally(idx) {
+  articles[idx] = {
+    ...articles[idx],
+    title:    document.getElementById('eTitle').value,
+    category: document.getElementById('eCategory').value,
+    tags:     document.getElementById('eTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    author:   document.getElementById('eAuthor').value,
+    content:  document.getElementById('eContent').value,
+    filename: pendingEditFile ? pendingEditFile.name : articles[idx].filename,
+    updated:  new Date().toISOString().slice(0,10)
+  };
+}
+
+async function deleteArticle() {
+  if (!confirm('Delete this article?')) return;
+  try { await fetch(`${API}/articles/${editingId}`, { method: 'DELETE' }); } catch {}
+  articles = articles.filter(a => a.id !== editingId);
+  hideEditForm();
+  renderExplore();
+  renderAdminTable();
+  toast('Article deleted');
+}
+
+// ── ANALYTICS ──
+function renderAnalytics() {
+  const tags = [...new Set(articles.flatMap(a => a.tags || []))];
+  const mostCat = (() => {
+    const counts = {};
+    articles.forEach(a => counts[a.category] = (counts[a.category]||0)+1);
+    return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+  })();
+
+  document.getElementById('metricGrid').innerHTML = [
+    { label: 'Total Articles', value: articles.length, icon: '📄' },
+    { label: 'Categories', value: CATEGORIES.length - 1, icon: '🗂' },
+    { label: 'Unique Tags', value: tags.length, icon: '🏷' },
+    { label: 'Most Active', value: mostCat, icon: '🏆' },
+  ].map(m => `<div class="metric-card">
+    <div class="metric-icon">${m.icon}</div>
+    <div class="metric-value">${m.value}</div>
+    <div class="metric-label">${m.label}</div>
+  </div>`).join('');
+
+  const BAR_COLORS = {HR:'#3730A3',Finance:'#065F46',IT:'#1E40AF',Support:'#92400E',Legal:'#6B21A8',Other:'#334155'};
+  document.getElementById('barChart').innerHTML = CATEGORIES.slice(1).map(cat => {
+    const count = articles.filter(a => a.category === cat).length;
+    const pct = articles.length ? Math.round(count / articles.length * 100) : 0;
+    return `<div class="bar-row">
+      <div class="bar-meta"><span>${cat}</span><span style="color:var(--muted)">${count} · ${pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${BAR_COLORS[cat]||'#888'}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHAT ──
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+
+  const msgDiv = document.getElementById('chatMessages');
+  msgDiv.innerHTML += `<div class="msg user">${escHtml(q)}</div>`;
+  const loadId = 'load-'+Date.now();
+  msgDiv.innerHTML += `<div class="msg ai loading" id="${loadId}"><span class="spinner"></span> Searching knowledge base…</div>`;
+  msgDiv.scrollTop = msgDiv.scrollHeight;
+
+  try {
+    const res = await fetch(`${API}/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q })
+    });
+    const data = await res.json();
+    document.getElementById(loadId).remove();
+    const sources = (data.sources || []).map(s => `📄 ${s}`).join(' · ');
+    msgDiv.innerHTML += `<div class="msg ai">
+      ${escHtml(data.answer || 'No answer returned.')}
+      ${data.confidence !== undefined ? `<div><span class="confidence-badge">Confidence: ${Math.round(data.confidence*100)}%</span></div>` : ''}
+      ${sources ? `<div class="sources-mini">${sources}</div>` : ''}
+    </div>`;
+  } catch (e) {
+    document.getElementById(loadId).remove();
+    msgDiv.innerHTML += `<div class="msg ai" style="color:var(--accent)">⚠ Could not reach backend. Make sure FastAPI is running at ${API}.</div>`;
+  }
+  msgDiv.scrollTop = msgDiv.scrollHeight;
+}
+
+// ── UTILS ──
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "title": "Data security protocols of The company",
+    "category": "HR",
+    "tags": [
+      "data",
+      "security",
+      "protocol"
+    ],
+    "author": "Admin- IT Sector",
+    "content": "All freshers read these files!!",
+    "filename": "1_data_security_protocols.pdf",
+    "updated": "2026-06-02"
+  },
+  {
+    "id": 2,
+    "title": "Microsoft corp.",
+    "category": "HR",
+    "tags": [
+      "Microsoft",
+      "information",
+      "employee"
+    ],
+    "author": "Admin - microsoft",
+    "content": "General  information on ms",
+    "filename": "2_microsoft.docx",
+    "updated": "2026-06-02"
+  }
+]
