@@ -6,7 +6,7 @@ colorTo: indigo
 sdk: docker
 pinned: false
 ---
-
+#metadata
 # 🏢 Company KB Portal
 
 ### ⚡ AI-Powered Knowledge Base with RAG (Retrieval Augmented Generation)
