@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 # ── LangChain / Vector / LLM imports ──
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
@@ -78,8 +78,11 @@ embedding = None
 def get_embedding():
     global embedding
     if embedding is None:
-        embedding = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        # Offloads tokenization and vector calculations to Hugging Face servers
+        embedding = HuggingFaceEndpointEmbeddings(
+            model="sentence-transformers/all-MiniLM-L6-v2",
+            task="feature-extraction",
+            huggingfacehub_api_token=os.getenv("HF_TOKEN") # Or "HUGGINGFACEHUB_API_TOKEN"
         )
     return embedding
 
@@ -113,19 +116,17 @@ PROMPT = PromptTemplate(template=PROMPT_TEMPLATE, input_variables=["context", "q
 def build_vector_store():
     docs = []
 
+    # 1. Load all files from the directory
     for fname in os.listdir(UPLOAD_DIR):
         fpath = os.path.join(UPLOAD_DIR, fname)
 
         try:
             if fname.endswith(".txt"):
                 loader = TextLoader(fpath, encoding="utf-8")
-
             elif fname.endswith(".pdf"):
                 loader = PyPDFLoader(fpath)
-
             elif fname.endswith(".docx"):
                 loader = Docx2txtLoader(fpath)
-
             else:
                 continue
 
@@ -137,28 +138,12 @@ def build_vector_store():
             docs.extend(loaded)
 
         except Exception as e:
-            print(f"Error loading {fname}: {e}")
+            logger.error(f"Error loading {fname}: {e}")
 
     if not docs:
         return None
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=50
-    )
-
-    chunks = splitter.split_documents(docs)
-
-    db = Chroma.from_documents(
-        documents=chunks,
-        embedding=get_embedding(),
-        persist_directory=CHROMA_DIR
-    )
-
-    db.persist()
-
-    return db
-    # Text Splitting
+    # 2. Text Splitting
     splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     chunks = splitter.split_documents(docs)
     logger.info(f"Split documents into {len(chunks)} textual chunks.")
@@ -167,7 +152,7 @@ def build_vector_store():
         logger.warning("Extracted text generated 0 usable vectors. Check if PDFs are image-only scans.")
         return None
 
-    # Release file locks before clearing old DB
+    # 3. Memory Cleanup & Clear Old DB (Crucial for Render's 512MB limit)
     gc.collect()
     time.sleep(0.5)
     if os.path.exists(CHROMA_DIR):
@@ -176,12 +161,13 @@ def build_vector_store():
         except Exception as e:
             logger.error(f"Could not purge directory cleanly: {e}")
 
-    # Build fresh database instance
+    # 4. Build single fresh database instance
     db = Chroma.from_documents(
         documents=chunks,
         embedding=get_embedding(),
         persist_directory=CHROMA_DIR
     )
+    
     logger.info("ChromaDB indexing complete. Vector store successfully built!")
     return db
 
