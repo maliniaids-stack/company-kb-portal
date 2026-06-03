@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 # ── LangChain / Vector / LLM imports ──
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_groq import ChatGroq
@@ -73,10 +73,15 @@ def save_articles(articles):
 
 
 # ── Embedding model (Loaded globally once) ──
-logger.info("Initializing HuggingFace Embedding Model...")
-embedding = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+embedding = None
+
+def get_embedding():
+    global embedding
+    if embedding is None:
+        embedding = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        )
+    return embedding
 
 # ── LLM (Groq LLaMA) ──
 logger.info("Initializing ChatGroq client...")
@@ -146,7 +151,7 @@ def build_vector_store():
 
     db = Chroma.from_documents(
         documents=chunks,
-        embedding=embedding,
+        embedding=get_embedding(),
         persist_directory=CHROMA_DIR
     )
 
@@ -174,7 +179,7 @@ def build_vector_store():
     # Build fresh database instance
     db = Chroma.from_documents(
         documents=chunks,
-        embedding=embedding,
+        embedding=get_embedding(),
         persist_directory=CHROMA_DIR
     )
     logger.info("ChromaDB indexing complete. Vector store successfully built!")
