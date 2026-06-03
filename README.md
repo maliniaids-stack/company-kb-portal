@@ -1,14 +1,43 @@
+---
+title: Company KB Portal
+emoji: 🏢
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
+# Company Knowledge Base Portal Backend
+FastAPI **RAG** application backed by 
+- ChromaDB (Vector Database)
+- Groq LLaMA 3.3 (LLM)
+- Sentence Transformers (Embeddings)
+
+---
+
+## 🚀 Live Demo
+
+👉 Try the application here: https://huggingface.co/spaces/MaliniS28/company-kb-portal
+
+---
+## 📸 Screenshot
+```md
+![Company KB Portal Screenshot](assets/screenshot2.png)
+![RAG WORKING](assets/flowchart.jpeg)
+```
+
 # KB Portal — Setup Guide
 
 ## Folder structure
-```
+```text
 kb_portal/
-├── index.html      ← open this in browser (or serve with any static server)
-├── app.py          ← FastAPI backend
-├── .env            ← add your GROQ_API_KEY here
-├── uploaded_docs/  ← auto-created, stores uploaded files
-├── chroma_db/      ← auto-created, vector store
-└── articles.json   ← auto-created, article metadata
+├── index.html            # Frontend SPA
+├── app.py                # FastAPI backend
+├── requirements.txt      # Python dependencies
+├── Dockerfile            # Deployment container config
+├── uploaded_docs/        # Uploaded files storage
+├── chroma_db/            # Vector database (auto-generated)
+└── articles.json         # Metadata storage (auto-generated)
 ```
 
 ## 1. Install dependencies
@@ -37,7 +66,19 @@ python -m http.server 5500
 ```
 
 ## How it works
-
+Document Upload
+      ↓
+Text Extraction (PDF/DOCX)
+      ↓
+Text Chunking (Recursive Splitter)
+      ↓
+Embeddings (all-MiniLM-L6-v2)
+      ↓
+Vector Store (ChromaDB)
+      ↓
+MMR Retrieval (Top-k = 4)
+      ↓
+LLM Response (Groq LLaMA 3.3)
 ### Explore Hub
 - Anyone can search, filter by category/tag, and click articles to read them.
 - Articles posted by admin are shown here with file download links.
@@ -58,5 +99,9 @@ Calls `POST /ask` on the backend which runs the full RAG pipeline:
 6. **Retrieval** → MMR retrieval, k=4
 7. **Generation** → LLaMA-3.3-70b via Groq
 
+### Environment Variables
+GROQ_API_KEY AND HF_KEY
 ### Analytics
 Live counts of articles, categories, tags, and a bar chart by category.
+### To connect
+[malinisportfolio.netlify.app](https://malinisportfolio.netlify.app/)
