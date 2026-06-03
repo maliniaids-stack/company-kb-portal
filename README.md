@@ -23,16 +23,16 @@ Built with **FastAPI + ChromaDB + Groq LLaMA 3.3**
 
 ## 🚀 Live Demo
 
-👉 Try it now:  
-:contentReference[oaicite:0]{index=0}
+Try it now
+👉 [Launch Company KB Portal](https://huggingface.co/spaces/MaliniS28/company-kb-portal)
 
 ---
 
 ## 📸 Product Preview
 
-![Dashboard](assets/screenshot2.png)
+![Dashboard](screenshot1.png)
 
-![RAG Architecture](assets/flowchart.jpeg)
+![RAG Architecture](Flowchart.jpeg)
 
 ---
 
